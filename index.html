@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VRChat Avatar List</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#111;
+    color:white;
+    margin:0;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+}
+
+#search{
+    width:100%;
+    padding:12px;
+    font-size:18px;
+    margin-bottom:20px;
+    border:none;
+    border-radius:10px;
+}
+
+.avatar{
+    background:#222;
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:10px;
+}
+
+.name{
+    font-size:22px;
+    margin-bottom:10px;
+}
+
+a{
+    display:inline-block;
+    background:#00aaff;
+    color:white;
+    text-decoration:none;
+    padding:10px 15px;
+    border-radius:8px;
+}
+
+a:hover{
+    background:#0088cc;
+}
+</style>
+</head>
+<body>
+
+<h1>VRChat Avatar Collection</h1>
+
+<input type="text" id="search" placeholder="Search avatars...">
+
+<div id="avatars">Loading...</div>
+
+<script>
+let avatarData = [];
+
+async function loadAvatars() {
+    try {
+        const response = await fetch("avatars.txt");
+        const text = await response.text();
+
+        const blocks = text.trim().split(/\n\s*\n/);
+
+        avatarData = [];
+
+        for (const block of blocks) {
+            const lines = block.split("\n");
+
+            if (lines.length >= 2) {
+                avatarData.push({
+                    name: lines[0].trim(),
+                    link: lines[1].trim()
+                });
+            }
+        }
+
+        renderAvatars();
+    } catch (err) {
+        document.getElementById("avatars").innerHTML =
+            "Could not load avatars.txt";
+    }
+}
+
+function renderAvatars() {
+    const search = document.getElementById("search").value.toLowerCase();
+
+    const container = document.getElementById("avatars");
+    container.innerHTML = "";
+
+    const filtered = avatarData.filter(a =>
+        a.name.toLowerCase().includes(search)
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = "<p>No avatars found.</p>";
+        return;
+    }
+
+    for (const avatar of filtered) {
+        const div = document.createElement("div");
+        div.className = "avatar";
+
+        div.innerHTML = `
+            <div class="name">${avatar.name}</div>
+            <a href="${avatar.link}" target="_blank">
+                Open Avatar Page
+            </a>
+        `;
+
+        container.appendChild(div);
+    }
+}
+
+document.getElementById("search")
+    .addEventListener("input", renderAvatars);
+
+loadAvatars();
+</script>
+
+</body>
+</html>
